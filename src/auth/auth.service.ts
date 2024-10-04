@@ -1,16 +1,25 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { Account } from './auth.entity';
 
 @Injectable()
 export class AuthService {
-  private readonly users = [
-    { username: 'thuan', password: '123' },
-  ];
+  constructor(
+    @InjectRepository(Account)
+    private accountRepository: Repository<Account>,
+    private jwtService: JwtService,
+  ) {}
 
-  validateUser(username: string, password: string): boolean {
-    const user = this.users.find(user => user.username === username && user.password === password);
-    if (user) {
-      return true;
+  async validateUser(username: string, password: string): Promise<{ isValid: boolean, role?: string, accessToken?: string }> {
+    const user = await this.accountRepository.findOne({ where: { username: username } });
+    if (user && user.pass === password) {
+      const payload = { username: user.username, sub: user.id, role: user.role };
+      const accessToken = this.jwtService.sign(payload);
+      return { isValid: true, accessToken };
     }
-    return false;
+    return { isValid: false };
   }
+  
 }

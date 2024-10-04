@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, UpdateResult  } from 'typeorm';
 import { Student } from './student.entity';
 
 @Injectable()
@@ -18,8 +18,8 @@ export class StudentService {
     return this.studentRepository.save(student);
   }
 
-  update(id: number, student: Student): Promise<void> {
-    return this.studentRepository.update(id, student).then(() => {});
+  update(id: number, student: Student): Promise<UpdateResult> {
+    return this.studentRepository.update(id, student);
   }
 
   findById(id: number): Promise<Student> {
@@ -33,5 +33,8 @@ export class StudentService {
         { last_name: Like(`%${name}%`) },
       ],
     });
+  }
+  remove(id: number): Promise<void> {
+    return this.studentRepository.delete(id).then(() => {});
   }
 }

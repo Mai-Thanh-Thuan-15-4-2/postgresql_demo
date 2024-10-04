@@ -1,27 +1,36 @@
-// app.module.ts
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Student } from './student.entity';
-import { StudentService } from './student.service';
-import { StudentController } from './student.controller';
+import { AuthModule } from './auth/auth.module';
+import { Student } from './student/student.entity';
+import { Account } from './auth/auth.entity';
+import { StudentService } from './student/student.service';
+import { StudentController } from './student/student.controller';
+import { ProtectedController } from './auth/jwt/protected.controller'; 
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'aws-0-ap-southeast-1.pooler.supabase.com',
-      port: 6543,
-      username: 'postgres.cefqqzhqenabbznqqqcn',
-      password: 'P4WfWfj2Ty@Ai7',
-      database: 'test',
-      entities: [Student],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: configService.get<string>('TYPE') as any,
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_DATABASE'),
+        entities: [Student, Account],
+        synchronize: true,
+      }),
     }),
     TypeOrmModule.forFeature([Student]),
-    AuthModule, // Import AuthModule
+    AuthModule,
   ],
-  controllers: [StudentController],
+  controllers: [StudentController, ProtectedController],
   providers: [StudentService],
 })
 export class AppModule {}
