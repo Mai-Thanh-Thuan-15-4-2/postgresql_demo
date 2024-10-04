@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, UpdateResult  } from 'typeorm';
+import { Repository, Like, UpdateResult } from 'typeorm';
 import { Student } from './student.entity';
 
 @Injectable()
@@ -10,31 +10,44 @@ export class StudentService {
     private studentRepository: Repository<Student>,
   ) {}
 
-  findAll(): Promise<Student[]> {
-    return this.studentRepository.find();
+  async findAll(): Promise<Student[]> {
+    return await this.studentRepository.find();
   }
 
-  create(student: Student): Promise<Student> {
-    return this.studentRepository.save(student);
+  async create(student: Student): Promise<Student> {
+    return await this.studentRepository.save(student);
   }
 
-  update(id: number, student: Student): Promise<UpdateResult> {
-    return this.studentRepository.update(id, student);
+  async update(id: number, student: Student): Promise<UpdateResult> {
+    const existingStudent = await this.studentRepository.findOne({ where: { student_id: id } });
+    if (!existingStudent) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+    return await this.studentRepository.update(id, student);
   }
 
-  findById(id: number): Promise<Student> {
-    return this.studentRepository.findOne({ where: { student_id: id } });
+  async findById(id: number): Promise<Student> {
+    const student = await this.studentRepository.findOne({ where: { student_id: id } });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+    return student;
   }
 
-  findByName(name: string): Promise<Student[]> {
-    return this.studentRepository.find({
+  async findByName(name: string): Promise<Student[]> {
+    return await this.studentRepository.find({
       where: [
         { first_name: Like(`%${name}%`) },
         { last_name: Like(`%${name}%`) },
       ],
     });
   }
-  remove(id: number): Promise<void> {
-    return this.studentRepository.delete(id).then(() => {});
+
+  async remove(id: number): Promise<void> {
+    const student = await this.studentRepository.findOne({ where: { student_id: id } });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+    await this.studentRepository.delete(id);
   }
 }

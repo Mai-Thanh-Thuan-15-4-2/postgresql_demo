@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseFilters, NotFoundException  } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseFilters, NotFoundException, ValidationPipe } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { Student } from './student.entity';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
@@ -20,13 +20,13 @@ export class StudentController {
 
   @Post()
   @Roles('admin')
-  create(@Body() student: Student): Promise<Student> {
+  create(@Body(new ValidationPipe()) student: Student): Promise<Student> {
     return this.studentService.create(student);
   }
 
   @Put(':id')
   @Roles('admin')
-  update(@Param('id') id: number, @Body() student: Student): Promise<UpdateResult> {
+  update(@Param('id') id: number, @Body(new ValidationPipe()) student: Student): Promise<UpdateResult> {
     return this.studentService.update(id, student);
   }
 
