@@ -8,6 +8,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest<Request>();
     const token = request.cookies['jwt'];
     if (!token) {
+      // TODO: Message lỗi này e nên tạo ra 1 file constant chứa các message lỗi 
       throw new UnauthorizedException('No token found');
     }
     return super.canActivate(context);

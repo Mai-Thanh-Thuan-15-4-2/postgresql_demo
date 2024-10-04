@@ -11,7 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         return request?.cookies?.jwt;
       }]),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET'),
+      secretOrKey: configService.get<string>('JWT_SECRET'), //TODO: E nên tạo ra 1 file constant chứa các key
     });
   }
 

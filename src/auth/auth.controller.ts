@@ -18,10 +18,11 @@ export class AuthController {
     const { username, password } = loginDto;
     const { isValid, role, accessToken } = await this.authService.validateUser(username, password);
     if (isValid) {
+      // TODO: này nữa nhan e
       response.cookie('jwt', accessToken, { httpOnly: true });
-      return { success: true, role };
+      return { success: true, role }; //TODO: Mấy cái cái response này e nên thống nhất 1 kiểu trả về thui nha
     } else {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials'); //TODO: Message lỗi này e nên tạo ra 1 file constant chứa các message lỗi
     }
   }
 }

@@ -20,7 +20,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '60m' },
+        signOptions: { expiresIn: '60m' }, // TODO: E nên tạo ra 1 file constant chứa các key
       }),
     }),
   ],

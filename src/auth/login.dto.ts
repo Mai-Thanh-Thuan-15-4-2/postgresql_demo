@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
 export class LoginDto {
-  @IsString()
+  @IsString() // TODO: Em xem thêm validate mình customer lại cái message trả về lun nha
   @IsNotEmpty()
   username: string;
 

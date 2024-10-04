@@ -6,6 +6,7 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    // TODO: E nên tạo ra 1 file constant chứa các role
     const roles = this.reflector.get<string[]>('roles', context.getHandler());
     if (!roles) {
       return true;
