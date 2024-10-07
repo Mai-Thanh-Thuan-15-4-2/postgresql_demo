@@ -96,17 +96,16 @@ export class StudentController {
     await this.studentService.remove(id);
     return { success: true };
   }
-
   @Post('import')
   @Roles('admin')
   @UseInterceptors(FileInterceptor('file'))
   async importStudents(@UploadedFile() file: Express.Multer.File): Promise<{ success: boolean }> {
     if (!file || !file.buffer) {
-      this.logger.error('File or file buffer missing', 'BadRequestException');
+      this.logger.error('File or file buffer missing at controller level.', 'BadRequestException');
       throw new BadRequestException({ message: ERROR_MESSAGES.FILE_EXIT_CODE[5012] });
     }
-    this.logger.log('Importing students from Excel file');
+    this.logger.log('Importing students from Excel file.');
     await this.studentService.importStudentsFromExcel(file.buffer);
     return { success: true };
-  }
+  }  
 }
