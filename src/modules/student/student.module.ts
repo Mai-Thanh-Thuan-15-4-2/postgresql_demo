@@ -7,14 +7,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Student } from '../../constants/entities/student.entity';
 
 @Module({
-    imports: [
-      TypeOrmModule.forFeature([Student]),
-      MulterModule.register({
-        dest: './uploads',
-      }),
-      LoggerModule,
-    ],
-    controllers: [StudentController],
-    providers: [StudentService],
-  })
-  export class StudentModule {}
+  imports: [
+    TypeOrmModule.forFeature([Student]),
+    MulterModule.register({
+      dest: './uploads',
+    }),
+    LoggerModule,
+  ],
+  controllers: [StudentController],
+  providers: [StudentService],
+})
+export class StudentModule {}

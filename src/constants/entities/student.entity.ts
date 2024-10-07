@@ -1,5 +1,12 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { IsEmail, IsNotEmpty, IsOptional, Length, IsInt, IsBoolean } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  Length,
+  IsInt,
+  IsBoolean,
+} from 'class-validator';
 
 @Entity({ schema: 'school', name: 'student' })
 export class Student {

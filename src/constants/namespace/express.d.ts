@@ -9,3 +9,5 @@ declare global {
     }
   }
 }
+
+//TODO: này như e cài thiếu type của multer thui ko cần phải define lại

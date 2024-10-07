@@ -1,4 +1,20 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseFilters, NotFoundException, ValidationPipe, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  UseFilters,
+  NotFoundException,
+  ValidationPipe,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StudentService } from '../services/student.service';
 import { Student } from '../entities/student.entity';
@@ -11,21 +27,24 @@ import { CreateStudentDto, UpdateStudentDto } from '../dto/student.dto';
 import { ERROR_MESSAGES } from '../../constants/enums/error-massage.enum';
 import { StudentResponseDto } from '../dto/student-response.dto';
 import { LoggerService } from '../../constants/services/logger.service';
-;
-
 @Controller('students')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard) // TODO: e có thể import nó ở mức global để không cần phải import ở từng controller
 @UseFilters(HttpExceptionFilter)
 export class StudentController {
   constructor(
     private readonly studentService: StudentService,
-    private readonly logger: LoggerService // Inject LoggerService
+    private readonly logger: LoggerService, // Inject LoggerService
   ) {
     this.logger.log('StudentController initialized');
   }
 
   @Get()
-  async findAll(@Query('page') page: number = 0, @Query('limit') limit: number = 10): Promise<Student[]> {
+  //example @Query()param: GetStudentDto
+  async findAll(
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10,
+  ): Promise<Student[]> {
+    // TODO: chỗ query e có thể sài dto với validate nó luôn, như này mà filter 20 fields thì gãy
     this.logger.log(`Fetching students, page: ${page}, limit: ${limit}`);
     return this.studentService.findAll({ page, limit });
   }
@@ -33,17 +52,24 @@ export class StudentController {
   @Post('create')
   @Roles('admin')
   async create(@Body() createStudentDto: CreateStudentDto): Promise<Student> {
-    this.logger.log(`Creating student with data: ${JSON.stringify(createStudentDto)}`);
+    this.logger.log(
+      `Creating student with data: ${JSON.stringify(createStudentDto)}`,
+    );
     return this.studentService.create(createStudentDto);
   }
 
   @Put(':id')
   @Roles('admin')
-  async update(@Param('id') id: number, @Body(new ValidationPipe()) updateStudentDto: UpdateStudentDto): Promise<UpdateResult> {
+  async update(
+    @Param('id') id: number,
+    @Body(new ValidationPipe()) updateStudentDto: UpdateStudentDto,
+  ): Promise<UpdateResult> {
     const student = await this.studentService.findById(id);
     if (!student) {
       this.logger.error(`Student with ID ${id} not found`, 'NotFoundException');
-      throw new NotFoundException({ message: ERROR_MESSAGES.VALIDATION_EXIT_CODE[3006] });
+      throw new NotFoundException({
+        message: ERROR_MESSAGES.VALIDATION_EXIT_CODE[3006],
+      });
     }
     this.logger.log(`Updating student with ID ${id}`);
     return this.studentService.update(id, updateStudentDto);
@@ -53,11 +79,15 @@ export class StudentController {
   async findByName(
     @Query('name') name: string,
     @Query('page') page: number = 0,
-    @Query('limit') limit: number = 10
+    @Query('limit') limit: number = 10,
   ): Promise<StudentResponseDto[]> {
-    this.logger.log(`Searching students by name: ${name}, page: ${page}, limit: ${limit}`);
+    this.logger.log(
+      `Searching students by name: ${name}, page: ${page}, limit: ${limit}`,
+    );
     const students = await this.studentService.findByName(name, page, limit);
-    return students.map(student => ({
+
+    console.log('students', students);
+    return students.map((student) => ({
       id: student.student_id,
       firstName: student.first_name,
       lastName: student.last_name,
@@ -83,7 +113,9 @@ export class StudentController {
     const student = await this.studentService.findById(id);
     if (!student) {
       this.logger.error(`Student with ID ${id} not found`, 'NotFoundException');
-      throw new NotFoundException({ message: ERROR_MESSAGES.VALIDATION_EXIT_CODE[3006] });
+      throw new NotFoundException({
+        message: ERROR_MESSAGES.VALIDATION_EXIT_CODE[3006],
+      });
     }
     this.logger.log(`Fetching student with ID ${id}`);
     return student;
@@ -99,13 +131,20 @@ export class StudentController {
   @Post('import')
   @Roles('admin')
   @UseInterceptors(FileInterceptor('file'))
-  async importStudents(@UploadedFile() file: Express.Multer.File): Promise<{ success: boolean }> {
+  async importStudents(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ success: boolean }> {
     if (!file || !file.buffer) {
-      this.logger.error('File or file buffer missing at controller level.', 'BadRequestException');
-      throw new BadRequestException({ message: ERROR_MESSAGES.FILE_EXIT_CODE[5012] });
+      this.logger.error(
+        'File or file buffer missing at controller level.',
+        'BadRequestException',
+      );
+      throw new BadRequestException({
+        message: ERROR_MESSAGES.FILE_EXIT_CODE[5012],
+      });
     }
     this.logger.log('Importing students from Excel file.');
     await this.studentService.importStudentsFromExcel(file.buffer);
     return { success: true };
-  }  
+  }
 }
