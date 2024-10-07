@@ -16,6 +16,16 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@constants/*": ["src/common/constants/*"],
+      "@entities/*": ["src/common/entities/*"],
+      "@exceptions/*": ["src/common/exceptions/*"],
+      "@interfaces/*": ["src/common/interfaces/*"],
+      "@factories/*": ["src/factories/*"],
+      "@modules/*": ["src/modules/*"],
+      "@utils/*": ["src/utils/*"],
+      "@validators/*": ["src/common/validators/*"]
+    }
   }
 }

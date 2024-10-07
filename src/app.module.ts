@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { Student } from './student/student.entity';
-import { Account } from './auth/auth.entity';
-import { StudentService } from './student/student.service';
-import { StudentController } from './student/student.controller';
-import { ProtectedController } from './auth/jwt/protected.controller'; 
-
+import { AuthModule } from './modules/auth/auth.module';
+import { Student } from './constants/entities/student.entity';
+import { typeOrmConfig } from './configs/databases/index';
+import { LoggerModule } from './modules/log/logger.module';
+import { StudentModule } from './modules/student/student.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -16,21 +14,11 @@ import { ProtectedController } from './auth/jwt/protected.controller';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: configService.get<string>('TYPE') as any,
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
-        entities: [Student, Account],
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) => typeOrmConfig(configService),
     }),
-    TypeOrmModule.forFeature([Student]),
     AuthModule,
+    LoggerModule,
+    StudentModule
   ],
-  controllers: [StudentController, ProtectedController],
-  providers: [StudentService],
 })
 export class AppModule {}
