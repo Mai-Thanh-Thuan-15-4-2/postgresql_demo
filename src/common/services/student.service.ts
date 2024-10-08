@@ -11,6 +11,7 @@ import { CreateStudentDto, UpdateStudentDto } from '../dto/student.dto';
 import { ERROR_MESSAGES } from '../constants/enums/error-massage.enum';
 import * as ExcelJS from 'exceljs';
 import { unlink } from 'fs/promises';
+import { Workbook } from 'exceljs';
 
 @Injectable()
 export class StudentService {
@@ -20,7 +21,7 @@ export class StudentService {
   ) { }
 
   async findAll({ page, limit }): Promise<StudentEntity[]> {
-    const offset = page * limit; 
+    const offset = page * limit;
     return this.studentRepository.find({
       skip: offset,
       take: limit,
@@ -112,31 +113,31 @@ export class StudentService {
       const emailSet = new Set<string>();
 
       worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-        if (rowNumber === 1) return; 
+        if (rowNumber === 1) return;
 
-        const email = row.getCell(4).value?.toString(); 
+        const email = row.getCell(4).value?.toString();
         if (emailSet.has(email)) {
           console.log(`Duplicate email found: ${email}`);
-          return; 
+          return;
         }
 
         const student = new StudentEntity();
-        student.first_name = this.truncateString(row.getCell(2).value?.toString(), 50); 
-        student.last_name = this.truncateString(row.getCell(3).value?.toString(), 50); 
+        student.first_name = this.truncateString(row.getCell(2).value?.toString(), 50);
+        student.last_name = this.truncateString(row.getCell(3).value?.toString(), 50);
         student.email = this.truncateString(email, 100);
-        student.gender = this.truncateString(row.getCell(5).value?.toString(), 10); 
+        student.gender = this.truncateString(row.getCell(5).value?.toString(), 10);
         student.part_time_job = row.getCell(6).value === 'true' || row.getCell(6).value === true;
-        student.absence_days = Number(row.getCell(7).value) || 0;  
-        student.extracurricular_activities = row.getCell(8).value === 'true' || row.getCell(8).value === true;  
-        student.weekly_self_study_hours = Number(row.getCell(9).value) || 0;  
-        student.career_aspiration = this.truncateString(row.getCell(10).value?.toString(), 100);  
-        student.math_score = Number(row.getCell(11).value) || 0;  
-        student.history_score = Number(row.getCell(12).value) || 0;  
-        student.physics_score = Number(row.getCell(13).value) || 0;  
-        student.chemistry_score = Number(row.getCell(14).value) || 0;  
-        student.biology_score = Number(row.getCell(15).value) || 0;  
-        student.english_score = Number(row.getCell(16).value) || 0;  
-        student.geography_score = Number(row.getCell(17).value) || 0;  
+        student.absence_days = Number(row.getCell(7).value) || 0;
+        student.extracurricular_activities = row.getCell(8).value === 'true' || row.getCell(8).value === true;
+        student.weekly_self_study_hours = Number(row.getCell(9).value) || 0;
+        student.career_aspiration = this.truncateString(row.getCell(10).value?.toString(), 100);
+        student.math_score = Number(row.getCell(11).value) || 0;
+        student.history_score = Number(row.getCell(12).value) || 0;
+        student.physics_score = Number(row.getCell(13).value) || 0;
+        student.chemistry_score = Number(row.getCell(14).value) || 0;
+        student.biology_score = Number(row.getCell(15).value) || 0;
+        student.english_score = Number(row.getCell(16).value) || 0;
+        student.geography_score = Number(row.getCell(17).value) || 0;
 
         emailSet.add(email);
         students.push(student);
@@ -154,5 +155,35 @@ export class StudentService {
   private truncateString(str: string, maxLength: number): string {
     return str?.length > maxLength ? str.substring(0, maxLength) : str;
   }
+  async exportStudentsToExcel(jsonData: any[]): Promise<Buffer> {
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Students');
 
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 10 },
+      { header: 'First Name', key: 'firstName', width: 15 },
+      { header: 'Last Name', key: 'lastName', width: 15 },
+      { header: 'Email', key: 'email', width: 25 },
+      { header: 'Gender', key: 'gender', width: 10 },
+      { header: 'Part Time Job', key: 'partTimeJob', width: 20 },
+      { header: 'Absence Days', key: 'absenceDays', width: 15 },
+      { header: 'Extracurricular Activities', key: 'extracurricularActivities', width: 30 },
+      { header: 'Weekly Self Study Hours', key: 'weeklySelfStudyHours', width: 20 },
+      { header: 'Career Aspiration', key: 'careerAspiration', width: 20 },
+      { header: 'Math Score', key: 'mathScore', width: 10 },
+      { header: 'History Score', key: 'historyScore', width: 10 },
+      { header: 'Physics Score', key: 'physicsScore', width: 10 },
+      { header: 'Chemistry Score', key: 'chemistryScore', width: 10 },
+      { header: 'Biology Score', key: 'biologyScore', width: 10 },
+      { header: 'English Score', key: 'englishScore', width: 10 },
+      { header: 'Geography Score', key: 'geographyScore', width: 10 },
+    ];
+
+    jsonData.forEach(student => {
+      worksheet.addRow(student);
+    });
+
+    const buffer: Buffer = await workbook.xlsx.writeBuffer() as Buffer;
+    return buffer;
+  }
 }

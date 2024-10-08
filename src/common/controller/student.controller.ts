@@ -15,6 +15,7 @@ import {
   UseInterceptors,
   BadRequestException,
   UsePipes,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StudentService } from '../services/student.service';
@@ -29,6 +30,8 @@ import { ERROR_MESSAGES } from '../constants/enums/error-massage.enum';
 import { StudentResponseDto } from '../dto/student-response.dto';
 import { LoggerService } from '../services/logger.service';
 import { GetStudentDto } from '../dto/get-student.dto';
+import { ExportStudentDto } from '../dto/export.student.dto';
+import { Response } from 'express';
 
 @Controller('students')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -139,5 +142,16 @@ export class StudentController {
     await this.studentService.importStudentsFromExcel(file.path);
     return { success: true };
   }
-  
+  @Post('export')
+  @Roles('admin')
+  async exportStudentsToExcel(
+    @Body() jsonData: any[],
+    @Res() res: Response
+  ): Promise<void> {
+    this.logger.log('Exporting students to Excel');
+    const buffer = await this.studentService.exportStudentsToExcel(jsonData);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=exported-students.xlsx');
+    res.end(buffer);
+  }
 }
