@@ -1,7 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Student } from '../../constants/entities/student.entity'; //TODO: E nên để thêm hậu tố Entity để dễ nhận biết
-import { Account } from '../../constants/entities/auth.entity';
+import { StudentEntity } from '../../common/entities/student.entity';
+import { AccountEntity } from '../../common/entities/auth.entity';
 
 export const typeOrmConfig = (
   configService: ConfigService,
@@ -12,6 +12,6 @@ export const typeOrmConfig = (
   username: configService.get<string>('DB_USERNAME'),
   password: configService.get<string>('DB_PASSWORD'),
   database: configService.get<string>('DB_DATABASE'),
-  entities: [Student, Account],
+  entities: [StudentEntity, AccountEntity],
   synchronize: false, //TODO: nhớ để false
 });

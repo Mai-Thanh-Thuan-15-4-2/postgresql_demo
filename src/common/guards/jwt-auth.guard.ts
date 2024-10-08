@@ -1,11 +1,7 @@
-import {
-  Injectable,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { ERROR_MESSAGES } from '../../constants/enums/error-massage.enum';
+import { ERROR_MESSAGES } from '../../common/constants/enums/error-massage.enum';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -18,5 +14,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       });
     }
     return super.canActivate(context);
+  }
+
+  handleRequest(err, user, info) {
+    if (err || !user) {
+      throw err || new UnauthorizedException(ERROR_MESSAGES.AUTHENTICATION_EXIT_CODE[1002]);
+    }
+    return user;
   }
 }

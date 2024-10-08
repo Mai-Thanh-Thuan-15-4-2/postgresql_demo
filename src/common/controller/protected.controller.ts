@@ -10,8 +10,8 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorator/roles.decorator';
 import { Request } from 'express';
-import { ERROR_MESSAGES } from '../../constants/enums/error-massage.enum';
-import { LoggerService } from '../../constants/services/logger.service';
+import { ERROR_MESSAGES } from '../constants/enums/error-massage.enum';
+import { LoggerService } from '../services/logger.service';
 
 @Controller()
 @UseGuards(JwtAuthGuard, RolesGuard)

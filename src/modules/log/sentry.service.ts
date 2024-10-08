@@ -1,4 +1,4 @@
-import { SENTRY_DSN } from '../../constants/index';
+import { SENTRY_DSN } from '../../common/constants/index';
 import { Injectable } from '@nestjs/common';
 import * as Sentry from '@sentry/nestjs';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';

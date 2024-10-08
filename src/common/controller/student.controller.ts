@@ -14,44 +14,43 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  UsePipes,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StudentService } from '../services/student.service';
-import { Student } from '../entities/student.entity';
+import { StudentEntity } from '../entities/student.entity';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorator/roles.decorator';
 import { UpdateResult } from 'typeorm';
 import { HttpExceptionFilter } from '../filters/http-exception.filter';
 import { CreateStudentDto, UpdateStudentDto } from '../dto/student.dto';
-import { ERROR_MESSAGES } from '../../constants/enums/error-massage.enum';
+import { ERROR_MESSAGES } from '../constants/enums/error-massage.enum';
 import { StudentResponseDto } from '../dto/student-response.dto';
-import { LoggerService } from '../../constants/services/logger.service';
+import { LoggerService } from '../services/logger.service';
+import { GetStudentDto } from '../dto/get-student.dto';
+
 @Controller('students')
-@UseGuards(JwtAuthGuard, RolesGuard) // TODO: e có thể import nó ở mức global để không cần phải import ở từng controller
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseFilters(HttpExceptionFilter)
 export class StudentController {
   constructor(
     private readonly studentService: StudentService,
-    private readonly logger: LoggerService, // Inject LoggerService
+    private readonly logger: LoggerService,
   ) {
     this.logger.log('StudentController initialized');
   }
 
   @Get()
-  //example @Query()param: GetStudentDto
-  async findAll(
-    @Query('page') page: number = 0,
-    @Query('limit') limit: number = 10,
-  ): Promise<Student[]> {
-    // TODO: chỗ query e có thể sài dto với validate nó luôn, như này mà filter 20 fields thì gãy
+  async findAll(@Query() query: GetStudentDto): Promise<StudentEntity[]> {
+    const { page = 0, limit = 10 } = query;
     this.logger.log(`Fetching students, page: ${page}, limit: ${limit}`);
     return this.studentService.findAll({ page, limit });
   }
 
   @Post('create')
   @Roles('admin')
-  async create(@Body() createStudentDto: CreateStudentDto): Promise<Student> {
+  async create(@Body() createStudentDto: CreateStudentDto): Promise<StudentEntity> {
     this.logger.log(
       `Creating student with data: ${JSON.stringify(createStudentDto)}`,
     );
@@ -109,7 +108,7 @@ export class StudentController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: number): Promise<Student> {
+  async findById(@Param('id') id: number): Promise<StudentEntity> {
     const student = await this.studentService.findById(id);
     if (!student) {
       this.logger.error(`Student with ID ${id} not found`, 'NotFoundException');
@@ -129,22 +128,16 @@ export class StudentController {
     return { success: true };
   }
   @Post('import')
-  @Roles('admin')
   @UseInterceptors(FileInterceptor('file'))
-  async importStudents(
-    @UploadedFile() file: Express.Multer.File,
-  ): Promise<{ success: boolean }> {
-    if (!file || !file.buffer) {
-      this.logger.error(
-        'File or file buffer missing at controller level.',
-        'BadRequestException',
-      );
-      throw new BadRequestException({
-        message: ERROR_MESSAGES.FILE_EXIT_CODE[5012],
-      });
+  async importStudents(@UploadedFile() file: Express.Multer.File): Promise<{ success: boolean }> {
+    if (!file || !file.path) {
+      console.error('File hoặc đường dẫn tệp bị thiếu');
+      throw new BadRequestException('File hoặc đường dẫn tệp bị thiếu');
     }
-    this.logger.log('Importing students from Excel file.');
-    await this.studentService.importStudentsFromExcel(file.buffer);
+
+    console.log('Đã nhận tệp:', file.originalname);
+    await this.studentService.importStudentsFromExcel(file.path);
     return { success: true };
   }
+  
 }

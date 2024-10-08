@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 @Entity({ schema: 'school', name: 'student' })
-export class Student {
+export class StudentEntity {
   @PrimaryGeneratedColumn()
   student_id: number;
 

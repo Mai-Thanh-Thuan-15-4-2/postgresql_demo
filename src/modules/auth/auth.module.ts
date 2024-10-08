@@ -3,9 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthService } from '../../constants/services/auth.service';
-import { AuthController } from '../../constants/controller/auth.controller';
-import { Account } from '../../constants/entities/auth.entity';
+import { AuthService } from '../../common/services/auth.service';
+import { AuthController } from '../../common/controller/auth.controller';
+import { AccountEntity } from '../../common/entities/auth.entity';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { LoggerModule } from '@modules/log/logger.module';
 
@@ -14,7 +14,7 @@ import { LoggerModule } from '@modules/log/logger.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forFeature([Account]),
+    TypeOrmModule.forFeature([AccountEntity]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

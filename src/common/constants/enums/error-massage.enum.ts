@@ -16,6 +16,7 @@ export const ERROR_MESSAGES = {
       3006: 'Not found.',
       3007: 'No matching value.',
       3008: 'Invalid value.',
+      3009: 'User already exists.',
     },
     DATABASE_EXIT_CODE: {
       4001: 'Cannot connect to the database.',
