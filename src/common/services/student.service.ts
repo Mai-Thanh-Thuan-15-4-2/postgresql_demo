@@ -160,23 +160,23 @@ export class StudentService {
     const worksheet = workbook.addWorksheet('Students');
 
     worksheet.columns = [
-      { header: 'ID', key: 'id', width: 10 },
-      { header: 'First Name', key: 'firstName', width: 15 },
-      { header: 'Last Name', key: 'lastName', width: 15 },
+      { header: 'ID', key: 'student_id', width: 10 },
+      { header: 'First Name', key: 'first_name', width: 15 },
+      { header: 'Last Name', key: 'last_name', width: 15 },
       { header: 'Email', key: 'email', width: 25 },
       { header: 'Gender', key: 'gender', width: 10 },
-      { header: 'Part Time Job', key: 'partTimeJob', width: 20 },
-      { header: 'Absence Days', key: 'absenceDays', width: 15 },
-      { header: 'Extracurricular Activities', key: 'extracurricularActivities', width: 30 },
-      { header: 'Weekly Self Study Hours', key: 'weeklySelfStudyHours', width: 20 },
-      { header: 'Career Aspiration', key: 'careerAspiration', width: 20 },
-      { header: 'Math Score', key: 'mathScore', width: 10 },
-      { header: 'History Score', key: 'historyScore', width: 10 },
-      { header: 'Physics Score', key: 'physicsScore', width: 10 },
-      { header: 'Chemistry Score', key: 'chemistryScore', width: 10 },
-      { header: 'Biology Score', key: 'biologyScore', width: 10 },
-      { header: 'English Score', key: 'englishScore', width: 10 },
-      { header: 'Geography Score', key: 'geographyScore', width: 10 },
+      { header: 'Part Time Job', key: 'part_time_job', width: 20 },
+      { header: 'Absence Days', key: 'absence_days', width: 15 },
+      { header: 'Extracurricular Activities', key: 'extracurricular_activities', width: 30 },
+      { header: 'Weekly Self Study Hours', key: 'weekly_self_study_hours', width: 20 },
+      { header: 'Career Aspiration', key: 'career_aspiration', width: 20 },
+      { header: 'Math Score', key: 'math_score', width: 10 },
+      { header: 'History Score', key: 'history_score', width: 10 },
+      { header: 'Physics Score', key: 'physics_score', width: 10 },
+      { header: 'Chemistry Score', key: 'chemistry_score', width: 10 },
+      { header: 'Biology Score', key: 'biology_score', width: 10 },
+      { header: 'English Score', key: 'english_score', width: 10 },
+      { header: 'Geography Score', key: 'geography_score', width: 10 },
     ];
 
     jsonData.forEach(student => {
