@@ -12,20 +12,29 @@ import { ERROR_MESSAGES } from '../constants/enums/error-massage.enum';
 import * as ExcelJS from 'exceljs';
 import { unlink } from 'fs/promises';
 import { Workbook } from 'exceljs';
+import { CacheService } from './cache.service';
+
 
 @Injectable()
 export class StudentService {
   constructor(
     @InjectRepository(StudentEntity)
     private studentRepository: Repository<StudentEntity>,
+    private cacheService: CacheService,
   ) { }
 
   async findAll({ page, limit }): Promise<StudentEntity[]> {
     const offset = page * limit;
-    return this.studentRepository.find({
+    const cachedStudents = await this.cacheService.get('allStudents');
+    if (cachedStudents) {
+      return cachedStudents;
+    }
+    const students = await this.studentRepository.find({
       skip: offset,
       take: limit,
     });
+    await this.cacheService.set('allStudents', students, 3600);
+    return students;
   }
 
   async create(createStudentDto: CreateStudentDto): Promise<StudentEntity> {
@@ -36,8 +45,7 @@ export class StudentService {
     student.gender = createStudentDto.gender;
     student.part_time_job = createStudentDto.partTimeJob;
     student.absence_days = createStudentDto.absenceDays;
-    student.extracurricular_activities =
-      createStudentDto.extracurricularActivities;
+    student.extracurricular_activities = createStudentDto.extracurricularActivities;
     student.weekly_self_study_hours = createStudentDto.weeklySelfStudyHours;
     student.career_aspiration = createStudentDto.careerAspiration;
     student.math_score = createStudentDto.mathScore;
@@ -47,7 +55,9 @@ export class StudentService {
     student.biology_score = createStudentDto.biologyScore;
     student.english_score = createStudentDto.englishScore;
     student.geography_score = createStudentDto.geographyScore;
-    return this.studentRepository.save(student);
+    const savedStudent = await this.studentRepository.save(student);
+    await this.cacheService.del('allStudents');
+    return savedStudent;
   }
 
   async update(
@@ -63,16 +73,24 @@ export class StudentService {
       });
     }
     Object.assign(student, updateStudentDto);
-    return this.studentRepository.update(id, student);
+    const updatedStudent = await this.studentRepository.update(id, student);
+    await this.cacheService.set(`student_${id}`, updatedStudent, 3600);
+    await this.cacheService.del('allStudents');
+    return updatedStudent;
   }
 
   async findById(id: number): Promise<StudentEntity> {
+    const cachedStudent = await this.cacheService.get(`student_${id}`);
+    if (cachedStudent) {
+      return cachedStudent;
+    }
     const student = await this.studentRepository.findOne({
       where: { student_id: id },
     });
     if (!student) {
       throw new NotFoundException(`Student with ID ${id} not found`);
     }
+    await this.cacheService.set(`student_${id}`, student, 3600);
     return student;
   }
 
@@ -100,6 +118,8 @@ export class StudentService {
       throw new NotFoundException(`Student with ID ${id} not found`);
     }
     await this.studentRepository.delete(id);
+    await this.cacheService.del(`student_${id}`);
+    await this.cacheService.del('allStudents');
   }
   async importStudentsFromExcel(filePath: string): Promise<void> {
     try {

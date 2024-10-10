@@ -7,6 +7,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { StudentEntity } from '../../common/entities/student.entity';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { CacheService } from '../../common/services/cache.service';
+import { CacheModule } from '@nestjs/cache-manager';
+import { TasksService } from 'src/common/services/tasks.service';
 
 @Module({
   imports: [
@@ -22,8 +25,14 @@ import { extname } from 'path';
       }),
     }),
     LoggerModule,
+    CacheModule.register({
+      ttl: 5,
+      max: 100,
+    }),
   ],
   controllers: [StudentController],
-  providers: [StudentService],
+  providers: [StudentService, CacheService, TasksService],
+  exports: [StudentService],
+
 })
 export class StudentModule {}
